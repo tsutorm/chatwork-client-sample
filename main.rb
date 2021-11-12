@@ -26,6 +26,7 @@ class Gaoon
 
   def collect_that_contains_other_organization_member_in_rooms(we_org_ids)
     rooms = client.get_rooms()
+    puts "number of rooms: #{rooms.length}"
     rooms.map do |r|
       sleep 2
       room_id = r["room_id"]
@@ -41,7 +42,7 @@ class Gaoon
         room_info[:other_org_members] = []
         room_info[:error] = e.message
       end
-      p room_info
+      print '.' # room_info.to_json
       room_info unless room_info[:other_org_members].empty?
     end.compact
   end
@@ -55,9 +56,11 @@ class Gaoon
   end
 
   def report
-    collect_that_contains_other_organization_member_in_rooms(we_organization_ids).to_json
+    room_info = collect_that_contains_other_organization_member_in_rooms(we_organization_ids)
+    puts ""
+    puts room_info.to_json
   end
 end
 
-p Gaoon.new.report
+Gaoon.new.report
 

@@ -21,17 +21,17 @@ class Gaoon
   end
 
   def contains_other_organization_members(we_org_ids, members)
-    members.map { |m| m unless we_org_ids.include? m['organization_id'] }.compact
+    members.filter { |m| m unless we_org_ids.include? m['organization_id'] }
   end
 
-  def contains_we_organization_members(we_org_ids, members)
-    members.map { |m| m if we_org_ids.include? m['organization_id'] }.compact
+  def contains_we_organization_admin_members(we_org_ids, members)
+    members.filter { |m| m if we_org_ids.include? m['organization_id'] and m['role'] == 'admin' }
   end
 
   def regroup_we_or_others(we_org_ids, members)
     {
       other_org_members: contains_other_organization_members(we_org_ids, members),
-      we_org_members: contains_we_organization_members(we_org_ids, members)
+      we_org_members: contains_we_organization_admin_members(we_org_ids, members)
     }
   end
 
@@ -39,7 +39,7 @@ class Gaoon
     rooms = client.get_rooms()
     puts "number of rooms: #{rooms.length}"
     rooms.map do |r|
-      sleep 2
+      sleep 1
       room_id = r["room_id"]
       room_info =
         {
@@ -48,13 +48,13 @@ class Gaoon
         }
       begin
         members = client.get_members(room_id: room_id)
-        room_info.merge(regroup_we_or_others(we_org_ids, members))
+        room_info[:members] = regroup_we_or_others(we_org_ids, members)
       rescue ChatWork::APIError => e
-        room_info.merge({other_org_members: [], we_org_members: []})
+        room_info[:members] = {other_org_members: [], we_org_members: []}
         room_info[:error] = e.message
       end
-      print '.' # room_info.to_json
-      room_info unless room_info[:other_org_members].empty?
+      print '.' #room_info.to_json
+      room_info unless room_info[:members].key?(:other_org_members)
     end.compact
   end
 

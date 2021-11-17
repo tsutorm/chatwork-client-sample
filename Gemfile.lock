@@ -1,10 +1,17 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    activesupport (6.1.4.1)
+      concurrent-ruby (~> 1.0, >= 1.0.2)
+      i18n (>= 1.6, < 2)
+      minitest (>= 5.1)
+      tzinfo (~> 2.0)
+      zeitwerk (~> 2.3)
     chatwork (0.12.2)
       faraday (>= 0.9)
       faraday_middleware
       hashie
+    concurrent-ruby (1.1.9)
     faraday (1.8.0)
       faraday-em_http (~> 1.0)
       faraday-em_synchrony (~> 1.0)
@@ -27,13 +34,20 @@ GEM
     faraday_middleware (1.2.0)
       faraday (~> 1.0)
     hashie (5.0.0)
+    i18n (1.8.11)
+      concurrent-ruby (~> 1.0)
+    minitest (5.14.4)
     multipart-post (2.1.1)
     ruby2_keywords (0.0.5)
+    tzinfo (2.0.4)
+      concurrent-ruby (~> 1.0)
+    zeitwerk (2.5.1)
 
 PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  activesupport
   chatwork
 
 BUNDLED WITH

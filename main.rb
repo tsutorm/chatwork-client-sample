@@ -20,26 +20,34 @@ class Gaoon
     ids.uniq
   end
 
-  def contains_other_organization_members(we_org_ids, members)
-    members.filter { |m| m unless we_org_ids.include? m['organization_id'] }
+  def contains_other_organization_members(we_org_ids, members, expected_keys=nil)
+    members.map do |m|
+      unless we_org_ids.include? m['organization_id']
+        expected_keys ? m.slice(*expected_keys): m
+      end
+    end.compact
   end
 
-  def contains_we_organization_admin_members(we_org_ids, members)
-    members.filter { |m| m if we_org_ids.include? m['organization_id'] and m['role'] == 'admin' }
+  def contains_we_organization_admin_members(we_org_ids, members,expected_keys=nil)
+    members.map do |m|
+      if we_org_ids.include? m['organization_id'] and m['role'] == 'admin'
+        expected_keys ? m.slice(*expected_keys): m
+      end
+    end.compact
   end
 
   def regroup_we_or_others(we_org_ids, members)
     {
-      other_org_members: contains_other_organization_members(we_org_ids, members),
-      we_org_members: contains_we_organization_admin_members(we_org_ids, members)
+      other_org_members: contains_other_organization_members(we_org_ids, members, ['chatwork_id', 'name', 'organization_name', 'department']),
+      we_org_members: contains_we_organization_admin_members(we_org_ids, members, ['name'])
     }
   end
 
   def collect_that_contains_other_organization_member_in_rooms(we_org_ids)
     rooms = client.get_rooms()
     puts "number of rooms: #{rooms.length}"
-    rooms.map do |r|
-      sleep 1
+    rooms[1..50].map do |r|
+      sleep 2
       room_id = r["room_id"]
       room_info =
         {
@@ -53,8 +61,10 @@ class Gaoon
         room_info[:members] = {other_org_members: [], we_org_members: []}
         room_info[:error] = e.message
       end
-      print '.' #room_info.to_json
-      room_info unless room_info[:members].key?(:other_org_members)
+      print '.'
+      # puts room_info.to_json
+      # puts ''
+      room_info unless room_info[:members][:other_org_members].empty?
     end.compact
   end
 
